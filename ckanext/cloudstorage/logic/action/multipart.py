@@ -92,8 +92,7 @@ def initiate_multipart(context, data_dict):
     user_id = None
     if context['auth_user_obj']:
         user_id = context['auth_user_obj'].id
-
-    uploader = ResourceCloudStorage({'multipart_name': name})
+    uploader = ResourceCloudStorage({'multipart_name': name, 'package_id': data_dict['package_id']})
     res_name = uploader.path_from_filename(id, name)
 
     upload_object = MultipartUpload.by_name(res_name)
@@ -144,7 +143,7 @@ def upload_multipart(context, data_dict):
     upload_id, part_number, part_content = toolkit.get_or_bust(
         data_dict, ['uploadId', 'partNumber', 'upload'])
 
-    uploader = ResourceCloudStorage({})
+    uploader = ResourceCloudStorage({'package_id': data_dict['package_id']})
     upload = model.Session.query(MultipartUpload).get(upload_id)
 
     resp = uploader.driver.connection.request(
@@ -186,7 +185,7 @@ def finish_multipart(context, data_dict):
         for part in model.Session.query(MultipartPart).filter_by(
             upload_id=upload_id).order_by(MultipartPart.n)
     ]
-    uploader = ResourceCloudStorage({})
+    uploader = ResourceCloudStorage({'package_id': data_dict['package_id']})
     try:
         obj = uploader.container.get_object(upload.name)
         obj.delete()
@@ -218,7 +217,7 @@ def finish_multipart(context, data_dict):
 def abort_multipart(context, data_dict):
     h.check_access('cloudstorage_abort_multipart', data_dict)
     id = toolkit.get_or_bust(data_dict, ['id'])
-    uploader = ResourceCloudStorage({})
+    uploader = ResourceCloudStorage({'package_id': data_dict['package_id']})
 
     resource_uploads = MultipartUpload.resource_uploads(id)
 

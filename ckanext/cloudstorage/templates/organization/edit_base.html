@@ -1,0 +1,8 @@
+{% ckan_extends %}
+
+{% block content_primary_nav %}
+    {{ super() }}
+    {% if h.check_access('organization_update', {'id': c.group_dict.id}) and h.org_change_cloudstorage() %}
+        {{ h.build_nav_icon('cloud_administration_org', _('Cloud Configuration'), id=c.group_dict.name) }}
+    {% endif %}
+{% endblock %}

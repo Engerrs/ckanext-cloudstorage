@@ -1,0 +1,24 @@
+{% extends "package/edit_base.html" %}
+
+{% import 'macros/form.html' as form %}
+
+
+{% block primary_content_inner %}
+
+    {{ form.errors(error_summary) }}
+
+    <form id="admin-cloud-configuration" class="form-horizontal" method="post" >
+        {{ form.select('storage', label=_('Storage bucket'), options=buckets, classes=[''], selected=c.dataset_config_data.storage, attrs={}) }}
+
+        {{ form.hidden('id', c.pkg_dict.id) }}
+
+        {{ form.hidden('org_id', c.pkg_dict.organization.id) }}
+
+        {% block save_button %}
+        <div class="like-header">
+          <button class="btn btn-primary" type="submit" name="save">{{ _('Save') }}</button>
+        </div>
+        {% endblock %}
+    </form>
+
+{% endblock %}

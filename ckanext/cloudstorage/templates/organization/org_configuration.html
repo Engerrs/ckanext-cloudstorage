@@ -1,0 +1,23 @@
+{% extends "organization/edit_base.html" %}
+{% import 'macros/form.html' as form %}
+
+{% block subtitle %}{{ _('Cloud Configurations') }} - {{ super() }}{% endblock %}
+
+
+{% block primary_content_inner %}
+
+    {{ form.errors(error_summary) }}
+
+    <form id="admin-cloud-configuration" class="form-horizontal" method="post" >
+        {{ form.select('storage', label=_('Storage bucket'), options=buckets, classes=[''], selected=c.org_config_data.storage, attrs={}) }}
+
+        {{ form.select('users_select_storage', label=_('Users select storage'), options=[{'name':yes, 'value': 'Yes'},{'name': no, 'value': 'No'}], classes=[''], selected=c.org_config_data.users_select_storage, attrs={'class':'selectpicker'}) }}
+
+        {{ form.hidden('id', c.group_dict.id) }}
+
+        {% block save_button %}
+          <button class="btn btn-primary" type="submit" name="save">{{ _('Save') }}</button>
+        {% endblock %}
+    </form>
+
+{% endblock %}

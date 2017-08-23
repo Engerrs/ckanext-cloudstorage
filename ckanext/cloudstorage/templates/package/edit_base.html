@@ -1,0 +1,8 @@
+{% ckan_extends %}
+
+{% block content_primary_nav %}
+    {{ super() }}
+    {% if h.check_access('package_update', {'id': pkg.id}) and h.user_change_cloudstorage(pkg) %}
+        {{ h.build_nav_icon('cloud_administration_dataset', _('Cloud Configuration'), id=pkg.name) }}
+    {% endif %}
+{% endblock %}

@@ -29,7 +29,10 @@ class CloudStoragePlugin(plugins.SingletonPlugin):
 
     def get_helpers(self):
         return dict(
-            cloudstorage_use_secure_urls=helpers.use_secure_urls
+            cloudstorage_use_secure_urls=helpers.use_secure_urls,
+            get_cloud_config_storage=helpers.get_cloud_config_storage,
+            org_change_cloudstorage=helpers.org_change_cloudstorage,
+            user_change_cloudstorage=helpers.user_change_cloudstorage
         )
 
     def configure(self, config):
@@ -50,6 +53,9 @@ class CloudStoragePlugin(plugins.SingletonPlugin):
 
     def get_resource_uploader(self, data_dict):
         # We provide a custom Resource uploader.
+        settings = helpers.get_cloud_config_storage(data_dict['package_id'])
+        if not settings or settings['storage'] == 'Filestorage':
+            return None
         return storage.ResourceCloudStorage(data_dict)
 
     def get_uploader(self, upload_to, old_filename=None):
@@ -76,6 +82,23 @@ class CloudStoragePlugin(plugins.SingletonPlugin):
                 '/dataset/{id}/resource/{resource_id}/download/{filename}',
                 action='resource_download'
             )
+
+        with SubMapper(map, controller='ckanext.cloudstorage.controller:CloudOptionsController') as m:
+            m.connect(
+                'cloud_administration',
+                '/ckan-admin/cloud_configurations',
+                action='admin_configuration',
+                ckan_icon='cloud')
+            m.connect(
+                'cloud_administration_org',
+                '/organization/cloud_configurations/{id}',
+                action='organization_configuration',
+                ckan_icon='cloud')
+            m.connect(
+                'cloud_administration_dataset',
+                '/dataset/cloud_configurations/{id}',
+                action='dataset_configuration',
+                ckan_icon='cloud')
 
         return map
 

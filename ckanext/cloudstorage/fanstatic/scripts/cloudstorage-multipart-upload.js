@@ -22,7 +22,7 @@ ckan.module('cloudstorage-multipart-upload', function($, _) {
         _uploadName: null,
         _uploadedParts: null,
         _clickedBtn: null,
-        _redirect_url: null;
+        _redirect_url: null,
 
         initialize: function() {
             $.proxyAll(this, /_on/);
@@ -170,8 +170,11 @@ ckan.module('cloudstorage-multipart-upload', function($, _) {
                 {
                     name: 'id',
                     value: this._resourceId
+                },
+                {
+                    name: 'package_id',
+                    value: this._packageId
                 }
-
             ];
         },
 
@@ -293,7 +296,7 @@ ckan.module('cloudstorage-multipart-upload', function($, _) {
                         self.i18n(action, {id: result.id}),
                         'success'
                     );
-                    self._onPerformUpload(file);
+                    self._onPerformUpload(file, formData.package_id);
                 },
                 function (err, st, msg) {
                     self.sandbox.notify(
@@ -308,11 +311,11 @@ ckan.module('cloudstorage-multipart-upload', function($, _) {
         },
 
 
-        _onPerformUpload: function(file) {
+        _onPerformUpload: function(file, package_id) {
             var id = this._id.val();
             var self = this;
             if (this._uploadId === null)
-                this._onPrepareUpload(file, id).then(
+                this._onPrepareUpload(file, id, package_id).then(
                     function (data) {
                         self._uploadId = data.result.id;
                         self.el.trigger('multipartstarted.cloudstorage');
@@ -327,15 +330,15 @@ ckan.module('cloudstorage-multipart-upload', function($, _) {
 
         },
 
-        _onPrepareUpload: function(file, id) {
-
+        _onPrepareUpload: function(file, id, package_id) {
             return $.ajax({
                 method: 'POST',
                 url: this.sandbox.client.url('/api/action/cloudstorage_initiate_multipart'),
                 data: JSON.stringify({
                     id: id,
                     name: encodeURIComponent(file.name),
-                    size: file.size
+                    size: file.size,
+                    package_id: package_id
                 })
             });
 
@@ -365,6 +368,7 @@ ckan.module('cloudstorage-multipart-upload', function($, _) {
             var data_dict = {
                 'uploadId': this._uploadId,
                 'id': this._resourceId,
+                'package_id': this._packageId
             }
             this.sandbox.client.call(
                 'POST',

@@ -4,7 +4,6 @@ import cgi
 import mimetypes
 import os.path
 import urlparse
-from ast import literal_eval
 from datetime import datetime, timedelta
 
 from pylons import config
@@ -14,10 +13,14 @@ import ckan.plugins as p
 
 from libcloud.storage.types import Provider, ObjectDoesNotExistError
 from libcloud.storage.providers import get_driver
+import json
+from ckan.common import c
 
 
 class CloudStorage(object):
-    def __init__(self):
+    def __init__(self, resource):
+        c.rsc = resource
+        self.get_cloud_settings
         self.driver = get_driver(
             getattr(
                 Provider,
@@ -47,7 +50,7 @@ class CloudStorage(object):
         A dictionary of options ckanext-cloudstorage has been configured to
         pass to the apache-libcloud driver.
         """
-        return literal_eval(config['ckanext.cloudstorage.driver_options'])
+        return c.c_driver_options
 
     @property
     def driver_name(self):
@@ -61,7 +64,7 @@ class CloudStorage(object):
             This value is used to lookup the apache-libcloud driver to use
             based on the Provider enum.
         """
-        return config['ckanext.cloudstorage.driver']
+        return c.c_driver
 
     @property
     def container_name(self):
@@ -69,7 +72,7 @@ class CloudStorage(object):
         The name of the container (also called buckets on some providers)
         ckanext-cloudstorage is configured to use.
         """
-        return config['ckanext.cloudstorage.container_name']
+        return c.c_bucket_name
 
     @property
     def use_secure_urls(self):
@@ -141,6 +144,59 @@ class CloudStorage(object):
             config.get('ckanext.cloudstorage.guess_mimetype', False)
         )
 
+    @property
+    def get_cloud_settings(self):
+        data = model.get_system_info('cloud_configuration')
+        if data:
+            data = json.loads(data)
+            containers = json.loads(data['buckets'])
+            r = model.Package.get(c.rsc['package_id'])
+            org = model.Group.get(r.owner_org)
+            if data['organizations_storage'] == 'Yes':
+                org_settings = model.get_system_info('org_config_' + org.id)
+                if org_settings:
+                    org_settings = json.loads(org_settings)
+                    if org_settings['users_select_storage'] == 'Yes':
+                        dataset_settings = model.get_system_info('dataset_config_' + r.id)
+                        if dataset_settings:
+                            dataset_settings = json.loads(dataset_settings)
+                            container = containers[dataset_settings['storage']]
+                            c.c_bucket_name = dataset_settings['storage']
+                            c.c_driver = container['driver']
+                            c.c_driver_options = container['driver_options']
+                            return
+                        else:
+                            container = containers[org_settings['storage']]
+                            c.c_bucket_name = org_settings['storage']
+                            c.c_driver = container['driver']
+                            c.c_driver_options = container['driver_options']
+                            return
+                    else:
+                        container = containers[org_settings['storage']]
+                        c.c_bucket_name = org_settings['storage']
+                        c.c_driver = container['driver']
+                        c.c_driver_options = container['driver_options']
+                        return
+                else:
+                    for container in containers:
+                        if 'default' in containers[container] and containers[container]['default'] == 'Yes':
+                            settings = containers[container]
+                            c.c_bucket_name = container
+                            c.c_driver = settings['driver']
+                            c.c_driver_options = settings['driver_options']
+                            return
+            else:
+                for container in containers:
+                    if 'default' in containers[container] and containers[container]['default'] == 'Yes':
+                        settings = containers[container]
+                        c.c_bucket_name = container
+                        c.c_driver = settings['driver']
+                        c.c_driver_options = settings['driver_options']
+                        return
+        else:
+            data = ''
+            return
+
 
 class ResourceCloudStorage(CloudStorage):
     def __init__(self, resource):
@@ -150,7 +206,7 @@ class ResourceCloudStorage(CloudStorage):
 
         :param resource: The resource dict.
         """
-        super(ResourceCloudStorage, self).__init__()
+        super(ResourceCloudStorage, self).__init__(resource)
 
         self.filename = None
         self.old_filename = None
