@@ -12,7 +12,7 @@ import ckanext.cloudstorage.logic.auth.multipart as m_auth
 class CloudStoragePlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IUploader)
     plugins.implements(plugins.IRoutes, inherit=True)
-    plugins.implements(plugins.IConfigurable)
+    # plugins.implements(plugins.IConfigurable)
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IActions)
     plugins.implements(plugins.ITemplateHelpers)
@@ -35,21 +35,21 @@ class CloudStoragePlugin(plugins.SingletonPlugin):
             user_change_cloudstorage=helpers.user_change_cloudstorage
         )
 
-    def configure(self, config):
+    # def configure(self, config):
 
-        required_keys = (
-            'ckanext.cloudstorage.driver',
-            'ckanext.cloudstorage.driver_options',
-            'ckanext.cloudstorage.container_name'
-        )
+    #     required_keys = (
+    #         'ckanext.cloudstorage.driver',
+    #         'ckanext.cloudstorage.driver_options',
+    #         'ckanext.cloudstorage.container_name'
+    #     )
 
-        for rk in required_keys:
-            if config.get(rk) is None:
-                raise RuntimeError(
-                    'Required configuration option {0} not found.'.format(
-                        rk
-                    )
-                )
+    #     for rk in required_keys:
+    #         if config.get(rk) is None:
+    #             raise RuntimeError(
+    #                 'Required configuration option {0} not found.'.format(
+    #                     rk
+    #                 )
+    #             )
 
     def get_resource_uploader(self, data_dict):
         # We provide a custom Resource uploader.
