@@ -1,7 +1,12 @@
 {% ckan_extends %}
 
+{%- block styles %}
+    {{ super() }}
+    {% resource 'cloudstorage/styles' %}
+{% endblock %}
+
 {% block scripts %}
     {{ super() }}
-    {% resource 'cloudstorage-js/main' %}
+    {% resource 'cloudstorage/scripts' %}
 
 {% endblock %}

@@ -4,14 +4,18 @@
 {% block primary_content_inner %}
     {{ form.errors(error_summary) }}
     <form id="admin-cloud-configuration" class="form-horizontal" method="post" >
-        {{ form.textarea('buckets', id='field-cloud-buckets', label=_('Buckets'), value=c.admin_data.buckets, error='', placeholder='Buckets name set in JSON format') }}
+        {{ form.select('storage', id='field-cloud-storage', label=_('Resource storage'), options=[{'name':filestorage, 'value': 'Filestorage'},{'name': cloudstorage, 'value': 'Cloudstorage'}], classes=[''], selected=c.admin_data.storage, attrs={'data-module': 'cloudstorage-storage'}) }}
+        <fieldset id="setting-store-on">
+            {{ form.select('store_on', id='field-store_on', label=_('Store On'), options=[{'name': 'Select Store', 'value': 'Select Store'},{'name': 'S3', 'value': 'S3'}], classes=['cloudstorage-store-on'], selected=c.admin_data.store_on, attrs={'data-module': 'cloudstorage-store-on'}) }}
+        </fieldset>
 
-        {{ form.select('storage', id='field-cloud-storage', label=_('Resource storage'), options=[{'name':filestorage, 'value': 'Filestorage'},{'name': cloudstorage, 'value': 'Cloudstorage'}], classes=[''], selected=c.admin_data.storage, attrs={}) }}
+        <fieldset id="settings-S3" class="settings-groups">
+            {{ form.textarea('buckets', id='field-cloud-buckets', label=_('Buckets'), value=c.admin_data.buckets, error='', placeholder='Buckets name set in JSON format') }}
 
-        {{ form.select('organizations_storage', id='field-cloud-org-storage', label=_('Organization select storage'), options=[{'name':yes, 'value': 'Yes'},{'name': no, 'value': 'No'}], classes=[''], selected=c.admin_data.organizations_storage, attrs={}) }}
+            {{ form.select('organizations_storage', id='field-cloud-org-storage', label=_('Organization select storage'), options=[{'name': no, 'value': 'No'}, {'name':yes, 'value': 'Yes'}], classes=[''], selected=c.admin_data.organizations_storage, attrs={}) }}
 
-        {{ form.select('users_select_storage', id='field-cloud-dataset-storage', label=_('Users select storage'), options=[{'name':yes, 'value': 'Yes'},{'name': no, 'value': 'No'}], classes=[''], selected=c.admin_data.users_select_storage, attrs={}) }}
-
+            {{ form.select('users_select_storage', id='field-cloud-dataset-storage', label=_('Users select storage'), options=[{'name': no, 'value': 'No'}, {'name':yes, 'value': 'Yes'}], classes=[''], selected=c.admin_data.users_select_storage, attrs={}) }}
+        </fieldset>
 
         {% block save_button %}
         <div class="like-header">

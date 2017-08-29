@@ -74,7 +74,7 @@ def org_change_cloudstorage():
     else:
         return False
 
-    if settings['organizations_storage'] == 'Yes':
+    if settings['organizations_storage'] == 'Yes' and settings['storage'] != 'Filestorage':
         return True
     else:
         return False
@@ -93,7 +93,7 @@ def user_change_cloudstorage(package):
     else:
         return False
 
-    if settings['users_select_storage'] == 'Yes' and org_settings['users_select_storage'] == 'Yes':
+    if settings['storage'] != 'Filestorage' and settings['users_select_storage'] == 'Yes' and org_settings['users_select_storage'] == 'Yes':
         return True
     else:
         return False

@@ -13,12 +13,23 @@ your `.ini`:
 If you haven't already, setup [CKAN file storage][ckanstorage] or the file
 upload button will not appear.
 
-Every driver takes two options, regardless of which one you use. Both
-the name of the driver and the name of the container/bucket are
-case-sensitive:
+Sysadmins can choose where resources will be uploaded, FileStorage or CloudStorage.
 
-    ckanext.cloudstorage.driver = AZURE_BLOBS
-    ckanext.cloudstorage.container_name = demo
+If CloudStorage is set, you must provide additional info needed for the uploading process:
+1.Driver
+2.Container_name
+3.Driver_options
+
+The info for `AWS S3` should be provided in JSON format, for example:
+
+    {
+    "CONTAINER_NAME": {"default": "Yes", "driver": "DRIVER", "driver_options": {"key" : "KEY", "secret": "SECRET_KEY"}},
+    "CONTAINER_NAME_2": {"driver": "DRIVER_2", "driver_options": {"key" : "KEY", "secret": "SECRET_KEY"}}
+    }
+
+You can provide more then one CONTAINER_NAME seperated by comma, with different keys and drivers. The `default` parameter is needed to select the container that will be used.
+
+Both the name of the driver and the name of the container/bucket are case-sensitive
 
 You can find a list of driver names [here][storage] (see the `Provider
 Constant` column.)
@@ -27,7 +38,14 @@ Each driver takes its own setup options. See the [libcloud][] documentation.
 These options are passed in using `driver_options`, which is a Python dict.
 For most drivers, this is all you need:
 
-    ckanext.cloudstorage.driver_options = {"key": "<your public key>", "secret": "<your secret key>"}
+    "driver_options": {"key": "<your public key>", "secret": "<your secret key>"}
+
+Sysadmins can provide an ability to choose between Containers for Organizations(users with admin role) and Users with editor role in organizations, by set `Organization select storage` and `Users select storage` to `Yes`.
+
+Endpoints for configuration:
+  For Sysadmins `/ckan-admin/cloud_configurations`. Tab for page appears on `/ckan-admin` page. Accessible only for sysadmins.
+  For Admins in Organization `/organization/cloud_configurations/ORG_NAME`. Tab for page appears on `/organization/edit/ORG_NAME` page. Accessible only for Organization admins if the `Organization select storage` is set to `Yes` in sysadmins page.
+  For Users with editor role in Organization `/dataset/cloud_configurations/DATASET_NAME`. Tab for page appears on `/dataset/edit/DATASET_NAME` page. Accessible only for Organization editors and admins if the `Users select storage` is set to `Yes` on both sysadmins and organization configuration pages.
 
 # Support
 
@@ -36,7 +54,6 @@ below have been tested:
 
 | Provider | Uploads | Downloads | Secure URLs (private resources) |
 | --- | --- | --- | --- |
-| Azure    | YES | YES | YES (if `azure-storage` is installed) |
 | AWS S3   | YES | YES | YES (if `boto` is installed) |
 | Rackspace | YES | YES | No |
 
